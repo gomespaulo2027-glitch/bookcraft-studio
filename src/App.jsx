@@ -1,5 +1,6 @@
 import React,{useEffect,useMemo,useState} from 'react';
 import {isGeminiConfigured} from './lib/gemini';
+import AILab from './AILab';
 
 const seed={id:'book-1',title:'O Meu Próximo Livro',subtitle:'Transforme uma ideia em um manuscrito profissional',author:'Autor',audience:'Geral',tone:'Autoritativo e Analítico',topic:'',chapters:[
 {id:1,title:'Introdução',status:'draft',words:0,content:''},
@@ -27,7 +28,7 @@ export default function App(){
   <header className="top"><div className="brand" onClick={()=>setScreen('home')}><span className="mark">✦</span><span>BookCraft <b>Studio</b></span></div><div className="top-actions"><span className={saved?'saved':'saving'}>{saved?'● Guardado':'● A guardar…'}</span><span className="ai-status">{isGeminiConfigured()?'IA ligada':'IA não configurada'}</span><button onClick={()=>setScreen('editor')}>Abrir editor</button></div></header>
   <div className="layout">
    <aside className="sidebar">
-    <nav>{[['home','⌂','Início'],['library','▣','Meus Ebooks'],['builder','✦','Book Builder'],['editor','✎','Editor'],['templates','▤','Templates']].map(([id,i,l])=><button className={screen===id?'active':''} onClick={()=>setScreen(id)} key={id}><span>{i}</span>{l}</button>)}</nav>
+    <nav>{[['home','⌂','Início'],['library','▣','Meus Ebooks'],['builder','✦','Book Builder'],['editor','✎','Editor'],['ai','✦','IA Studio'],['templates','▤','Templates']].map(([id,i,l])=><button className={screen===id?'active':''} onClick={()=>setScreen(id)} key={id}><span>{i}</span>{l}</button>)}</nav>
     <div className="side-bottom"><small>BOOKCRAFT STUDIO</small><p>Crie, edite e prepare ebooks profissionais.</p></div>
    </aside>
    <main className="main">
@@ -35,6 +36,7 @@ export default function App(){
     {screen==='library'&&<Library project={project} setScreen={setScreen}/>}
     {screen==='builder'&&<Builder project={project} setProject={setProject} active={active} setActive={setActive} addChapter={addChapter} setScreen={setScreen}/>}
     {screen==='editor'&&<Editor project={project} chapter={chapter} updateChapter={updateChapter} setScreen={setScreen}/>}
+    {screen==='ai'&&<AILab project={project} setProject={setProject} setScreen={setScreen}/>}
     {screen==='templates'&&<Templates setProject={setProject} setScreen={setScreen}/>}
    </main>
   </div>
