@@ -1,0 +1,9 @@
+import mammoth from 'mammoth';
+import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs';
+
+function cleanText(text=''){return text.replace(/\r/g,'').replace(/[ \t]+\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim();}
+export async function importTextFile(file){return {title:file.name.replace(/\.[^.]+$/,''),text:cleanText(await file.text()),format:'TXT'};}
+export async function importDocxFile(file){const {value}=await mammoth.extractRawText({arrayBuffer:await file.arrayBuffer()});return {title:file.name.replace(/\.[^.]+$/,''),text:cleanText(value),format:'DOCX'};}
+export async function importPdfFile(file){const pdf=await getDocument({data:new Uint8Array(await file.arrayBuffer()),disableWorker:true}).promise;const pages=[];for(let i=1;i<=pdf.numPages;i++){const page=await pdf.getPage(i);const content=await page.getTextContent();pages.push(content.items.map(item=>item.str||'').join(' '));}return {title:file.name.replace(/\.[^.]+$/,''),text:cleanText(pages.join('\n\n')),format:'PDF'};}
+export async function importDocument(file){const ext=file.name.split('.').pop()?.toLowerCase();if(ext==='txt')return importTextFile(file);if(ext==='docx')return importDocxFile(file);if(ext==='pdf')return importPdfFile(file);throw new Error('Formato não suportado. Use DOCX, PDF ou TXT.');}
+export function textToChapters(text,maxChars=9000){const blocks=cleanText(text).split(/\n{2,}/).filter(Boolean);const chapters=[];let current=[];const heading=/^(cap[ií]tulo|chapter|parte|part|sec[cç][aã]o)\b/i;for(const block of blocks){if(heading.test(block)&&current.length){chapters.push(current.join('\n\n'));current=[block];}else current.push(block);}if(current.length)chapters.push(current.join('\n\n'));const split=[];for(const part of chapters){if(part.length<=maxChars)split.push(part);else for(let i=0;i<part.length;i+=maxChars)split.push(part.slice(i,i+maxChars).trim());}return split.filter(Boolean);}
