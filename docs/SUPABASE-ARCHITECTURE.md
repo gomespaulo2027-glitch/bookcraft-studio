@@ -1,60 +1,63 @@
 # BookCraft Studio + Supabase
 
-## Projeto conectado
+## Projeto
 
 - Project: bookcraft-studio
 - Region: eu-west-1
 - Database: PostgreSQL 17
 - API URL: https://whadpxzatojkkmuifmjs.supabase.co
 
-## Estado inicial verificado
+## Dados
 
-As tabelas existentes são:
+Tabelas principais:
 
-- public.profiles
-- public.manuscripts
-- public.content_anchors
+- `public.profiles`
+- `public.manuscripts`
+- `public.content_anchors`
 
-Todas têm RLS ativado.
-
-## Segurança aplicada
-
-As policies restringem perfis, manuscritos e âncoras ao utilizador autenticado dono dos dados.
-
-Também foram criados índices para as foreign keys:
-
-- manuscripts(user_id)
-- content_anchors(manuscript_id)
+As tabelas têm RLS ativado e as policies restringem os dados ao utilizador autenticado proprietário.
 
 ## Storage
 
-Foram criados três buckets privados:
+Buckets privados usados pelo projeto:
 
-- bookcraft-imports — DOCX/PDF/TXT e outros ficheiros de origem
-- bookcraft-covers — capas
-- bookcraft-exports — PDF/EPUB/DOCX gerados
+- `bookcraft-imports` — ficheiros de origem.
+- `bookcraft-covers` — capas.
+- `bookcraft-exports` — ficheiros gerados.
 
-Os objetos devem usar o primeiro segmento do caminho como o UUID do utilizador:
+Padrão de caminho:
 
 `<user-id>/<manuscript-id>/<filename>`
 
-As policies de Storage limitam acesso ao próprio utilizador.
-
 ## Cliente
 
-O frontend usa apenas a publishable key:
+O frontend usa somente:
+
+`VITE_SUPABASE_URL`
 
 `VITE_SUPABASE_PUBLISHABLE_KEY`
 
-Nunca colocar service_role/secret key no frontend.
+Nunca colocar service-role key ou outro segredo no frontend.
 
-## Próximas camadas
+## Autenticação
 
-1. Autenticação Supabase Auth
-2. Sincronização automática do editor
-3. Importação DOCX/PDF/TXT
-4. Exportação PDF/EPUB/DOCX
-5. Capas e metadados
-6. Edge Function para IA, retirando a chave Gemini do browser
-7. PWA/offline
-8. Publicação
+A aplicação usa Supabase Auth. O fluxo de autenticação deve produzir uma sessão válida antes de chamadas protegidas à Edge Function.
+
+## IA
+
+A Edge Function `bookcraft-ai` está no backend.
+
+Responsabilidade:
+
+- autenticar o utilizador;
+- ler `GEMINI_API_KEY` server-side;
+- chamar Gemini;
+- devolver o resultado ao cliente.
+
+A chave Gemini não é uma variável Vite e não deve ser adicionada ao `.env.example`.
+
+## Manutenção
+
+Alterações de schema, RLS, Auth, Storage ou Edge Functions devem ser feitas de forma incremental e verificadas antes de modificar o frontend.
+
+Para o estado consolidado do projeto, consulte `docs/PROJECT-STATUS.md`.
