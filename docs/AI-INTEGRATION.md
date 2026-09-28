@@ -1,35 +1,74 @@
-# BookCraft Studio — IA real
+# BookCraft Studio — integração de IA
 
-A camada de IA usa a API Gemini através de um adaptador isolado em `src/lib/gemini.js`.
+## Arquitetura atual
 
-## Configuração local
+A aplicação chama o Gemini através da Edge Function do Supabase:
 
-1. Crie `.env.local` a partir de `.env.example`.
-2. Defina `VITE_GEMINI_API_KEY` com uma chave Gemini válida.
-3. Opcionalmente altere `VITE_GEMINI_MODEL`.
-4. Execute `npm run dev`.
+```
+UI React
+  -> src/lib/gemini.js
+  -> supabase.functions.invoke("bookcraft-ai")
+  -> Supabase Edge Function
+  -> GEMINI_API_KEY (segredo server-side)
+  -> Gemini API
+```
 
-## Funcionalidades desta fase
+A chave Gemini privada **não deve ser colocada no Vite, no browser ou no GitHub**.
 
-- geração de estrutura/outline;
-- geração de capítulos;
-- reescrita editorial;
-- expansão de texto;
-- resumo de texto;
-- estado de configuração da IA no Book Builder;
-- tratamento de erros e carregamento no UI.
+## Frontend
+
+`src/lib/gemini.js` é o único adaptador principal da aplicação para a IA.
+
+O frontend precisa apenas da configuração pública do Supabase:
+
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_PUBLISHABLE_KEY`
+
+O modelo padrão atualmente usado pelo adaptador é `gemini-3.1-flash-lite`.
+
+## Edge Function
+
+A função é:
+
+`bookcraft-ai`
+
+Ela:
+
+1. recebe a requisição autenticada;
+2. valida a sessão Supabase;
+3. lê `GEMINI_API_KEY` do ambiente da Edge Function;
+4. chama a API Gemini;
+5. devolve somente o texto necessário ao frontend.
+
+## Diagnóstico
+
+O estado mostrado na interface distingue:
+
+- configuração pública do cliente Supabase;
+- configuração privada do Gemini no backend.
+
+Portanto, uma mensagem sobre configuração do Supabase no browser não deve ser interpretada como prova de que a `GEMINI_API_KEY` está ausente no backend.
 
 ## Segurança
 
-O frontend Vite consegue chamar a API diretamente para facilitar o protótipo, mas uma chave Gemini embutida num frontend publicado pode ser extraída pelo utilizador final. Antes de produção, mover as chamadas para uma função server-side (Supabase Edge Function, Cloudflare Worker ou outro backend) e guardar o segredo apenas no servidor.
+Nunca:
 
-## Próximas camadas
+- adicionar `GEMINI_API_KEY` ao `.env.example`;
+- colocar a chave em código React;
+- imprimir a chave em logs;
+- enviar a chave em mensagens, issues ou commits;
+- pedir ao utilizador para colar a chave no chat.
 
-- Supabase Auth + Database;
-- Edge Function para proxy seguro da IA;
-- histórico de gerações;
-- limites por utilizador/plano;
-- importação DOCX/PDF/TXT;
-- exportação PDF/EPUB/DOCX;
-- capas e metadados;
-- PWA/offline.
+## Validação
+
+Para alterações na IA:
+
+```bash
+npm run build
+```
+
+Depois validar o fluxo autenticado no ambiente de deploy.
+
+## Contexto para manutenção
+
+O problema de ambiente/execução da IA pode ser investigado separadamente no Lovable. Não é necessário substituir a arquitetura do repositório para isso.
