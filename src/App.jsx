@@ -1,4 +1,5 @@
 import React,{useEffect,useMemo,useState} from 'react';
+import {isGeminiConfigured} from './lib/gemini';
 
 const seed={id:'book-1',title:'O Meu Próximo Livro',subtitle:'Transforme uma ideia em um manuscrito profissional',author:'Autor',audience:'Geral',tone:'Autoritativo e Analítico',topic:'',chapters:[
 {id:1,title:'Introdução',status:'draft',words:0,content:''},
@@ -23,7 +24,7 @@ export default function App(){
  const addChapter=()=>{const id=Math.max(0,...project.chapters.map(c=>c.id))+1;setProject(p=>({...p,chapters:[...p.chapters,{id,title:'Novo capítulo',status:'draft',words:0,content:''}]}));setActive(id);setScreen('builder')};
 
  return <div className="app">
-  <header className="top"><div className="brand" onClick={()=>setScreen('home')}><span className="mark">✦</span><span>BookCraft <b>Studio</b></span></div><div className="top-actions"><span className={saved?'saved':'saving'}>{saved?'● Guardado':'● A guardar…'}</span><button onClick={()=>setScreen('editor')}>Abrir editor</button></div></header>
+  <header className="top"><div className="brand" onClick={()=>setScreen('home')}><span className="mark">✦</span><span>BookCraft <b>Studio</b></span></div><div className="top-actions"><span className={saved?'saved':'saving'}>{saved?'● Guardado':'● A guardar…'}</span><span className="ai-status">{isGeminiConfigured()?'IA ligada':'IA não configurada'}</span><button onClick={()=>setScreen('editor')}>Abrir editor</button></div></header>
   <div className="layout">
    <aside className="sidebar">
     <nav>{[['home','⌂','Início'],['library','▣','Meus Ebooks'],['builder','✦','Book Builder'],['editor','✎','Editor'],['templates','▤','Templates']].map(([id,i,l])=><button className={screen===id?'active':''} onClick={()=>setScreen(id)} key={id}><span>{i}</span>{l}</button>)}</nav>
