@@ -13,6 +13,9 @@ Aplicação mobile-first para criação e produção de ebooks, reconstruída a 
 - Autosave local
 - Exportação/impressão pelo navegador
 - Design system editorial baseado no material Stitch
+- IA real via Gemini: outline, geração de capítulos e edição editorial
+- IA Studio dedicado com estados de carregamento e erros
+- Configuração por variáveis de ambiente, sem chave commitada
 
 ## Desenvolvimento local
 ```bash
@@ -24,6 +27,12 @@ Build de produção:
 ```bash
 npm run build
 ```
+
+## IA real — configuração
+
+Copie `.env.example` para `.env.local` e defina `VITE_GEMINI_API_KEY`. Opcionalmente defina `VITE_GEMINI_MODEL`. Nunca coloque uma chave real no GitHub.
+
+A documentação da integração está em `docs/AI-INTEGRATION.md`. Nesta fase, a chamada Gemini é feita pelo frontend para permitir validação rápida. Antes de produção, a chamada deve migrar para uma função server-side/Edge Function.
 
 ## Arquitetura de evolução
 O frontend está separado por áreas para permitir adicionar, sem reconstrução do produto:
