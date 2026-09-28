@@ -13,7 +13,11 @@
     "vite": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "@supabase/supabase-js": "latest"
+    "@supabase/supabase-js": "latest",
+    "mammoth": "1.12.2",
+    "pdfjs-dist": "6.3.289",
+    "docx": "9.7.2",
+    "jszip": "3.10.2"
   },
   "devDependencies": {}
 }
