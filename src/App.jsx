@@ -1,5 +1,7 @@
 import React,{useEffect,useMemo,useState} from 'react';
 import {isGeminiConfigured} from './lib/gemini';
+import {isSupabaseConfigured,supabase,saveManuscript,listManuscripts} from './lib/supabase';
+import AuthPanel from './AuthPanel';
 import AILab from './AILab';
 
 const seed={id:'book-1',title:'O Meu Próximo Livro',subtitle:'Transforme uma ideia em um manuscrito profissional',author:'Autor',audience:'Geral',tone:'Autoritativo e Analítico',topic:'',chapters:[
@@ -17,7 +19,11 @@ export default function App(){
  const [screen,setScreen]=useState('home');
  const [active,setActive]=useState(1);
  const [saved,setSaved]=useState(true);
+ const [user,setUser]=useState(null);
+ const [cloudReady,setCloudReady]=useState(false);
  useEffect(()=>{save(project);setSaved(true)},[project]);
+ useEffect(()=>{if(!supabase)return; supabase.auth.getUser().then(async({data})=>{if(!data.user)return;setUser(data.user);try{const rows=await listManuscripts(data.user.id);const remote=rows[0];if(remote){setProject(p=>({...p,remoteId:remote.id,title:remote.title,subtitle:remote.metadata?.subtitle||p.subtitle,author:remote.metadata?.author||p.author,audience:remote.metadata?.audience||p.audience,tone:remote.metadata?.tone||p.tone,topic:remote.metadata?.topic||p.topic,chapters:remote.content_json?.chapters||p.chapters}));}setCloudReady(true)}catch(e){console.error(e)}}); const {data:{subscription}}=supabase.auth.onAuthStateChange((_event,session)=>setUser(session?.user||null)); return()=>subscription.unsubscribe()},[]);
+ useEffect(()=>{if(!user||!cloudReady||!supabase)return; const timer=setTimeout(async()=>{try{const remote=await saveManuscript(project,user.id); if(remote?.id&&!project.remoteId)setProject(p=>({...p,remoteId:remote.id}));}catch(e){console.error(e)}},900); return()=>clearTimeout(timer)},[project,user,cloudReady]);
  const chapter=project.chapters.find(c=>c.id===active)||project.chapters[0];
  const total=useMemo(()=>project.chapters.reduce((n,c)=>n+c.words,0),[project]);
  const update=(patch)=>{setSaved(false);setProject(p=>({...p,...patch}))};
@@ -25,13 +31,14 @@ export default function App(){
  const addChapter=()=>{const id=Math.max(0,...project.chapters.map(c=>c.id))+1;setProject(p=>({...p,chapters:[...p.chapters,{id,title:'Novo capítulo',status:'draft',words:0,content:''}]}));setActive(id);setScreen('builder')};
 
  return <div className="app">
-  <header className="top"><div className="brand" onClick={()=>setScreen('home')}><span className="mark">✦</span><span>BookCraft <b>Studio</b></span></div><div className="top-actions"><span className={saved?'saved':'saving'}>{saved?'● Guardado':'● A guardar…'}</span><span className="ai-status">{isGeminiConfigured()?'IA ligada':'IA não configurada'}</span><button onClick={()=>setScreen('editor')}>Abrir editor</button></div></header>
+  <header className="top"><div className="brand" onClick={()=>setScreen('home')}><span className="mark">✦</span><span>BookCraft <b>Studio</b></span></div><div className="top-actions"><span className={saved?'saved':'saving'}>{saved?'● Guardado':'● A guardar…'}</span><span className="ai-status">{isGeminiConfigured()?'IA ligada':'IA não configurada'}</span><span className="ai-status">{isSupabaseConfigured()?(user?'Cloud ligado':'Cloud disponível'):'Cloud não configurado'}</span><button onClick={()=>setScreen(user?'account':'editor')}>{user?'Conta':'Abrir editor'}</button></div></header>
   <div className="layout">
    <aside className="sidebar">
-    <nav>{[['home','⌂','Início'],['library','▣','Meus Ebooks'],['builder','✦','Book Builder'],['editor','✎','Editor'],['ai','✦','IA Studio'],['templates','▤','Templates']].map(([id,i,l])=><button className={screen===id?'active':''} onClick={()=>setScreen(id)} key={id}><span>{i}</span>{l}</button>)}</nav>
+    <nav>{[['home','⌂','Início'],['library','▣','Meus Ebooks'],['builder','✦','Book Builder'],['editor','✎','Editor'],['ai','✦','IA Studio'],['templates','▤','Templates'],['account','◉','Conta']].map(([id,i,l])=><button className={screen===id?'active':''} onClick={()=>setScreen(id)} key={id}><span>{i}</span>{l}</button>)}</nav>
     <div className="side-bottom"><small>BOOKCRAFT STUDIO</small><p>Crie, edite e prepare ebooks profissionais.</p></div>
    </aside>
    <main className="main">
+    {screen==='account'&&<section className="page"><AuthPanel user={user} setUser={setUser}/></section>}
     {screen==='home'&&<Home project={project} total={total} setScreen={setScreen} addChapter={addChapter}/>}
     {screen==='library'&&<Library project={project} setScreen={setScreen}/>}
     {screen==='builder'&&<Builder project={project} setProject={setProject} active={active} setActive={setActive} addChapter={addChapter} setScreen={setScreen}/>}
