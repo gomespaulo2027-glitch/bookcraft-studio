@@ -15,3 +15,4 @@ export async function rewriteText(project,chapter,instruction){const prompt=`Atu
 export async function expandText(project,chapter){return rewriteText(project,chapter,'Expanda o texto com explicações, um exemplo prático e transições melhores. Preserve o conteúdo existente e evite repetição.');}
 export async function summarizeText(project,chapter){return rewriteText(project,chapter,'Crie uma versão mais concisa, removendo redundâncias sem perder as ideias essenciais.');}
 export function isGeminiConfigured(){return isSupabaseConfigured()&&Boolean(supabase);}
+export function getGeminiSetupState(){return isSupabaseConfigured()&&Boolean(supabase)?'ready':'supabase-client-missing';}
