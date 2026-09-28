@@ -1,8 +1,11 @@
-# Desenvolvimento do BookCraft Studio
+# Desenvolvimento visual do BookCraft Studio
 
-Fonte: export do Google AI Studio enviado em 28/09/2026.
+## Origem
 
-O pacote Stitch contém cinco ecrãs de referência:
+Documento baseado no material de referência exportado do Google AI Studio/Stitch em 28/09/2026.
+
+Referências principais:
+
 - Home Dashboard
 - Guided Ebook Creator / Create Wizard
 - AI Book Builder Workspace
@@ -10,30 +13,27 @@ O pacote Stitch contém cinco ecrãs de referência:
 - Ebook Studio Brand Mark
 
 ## Direção visual
-- Deep Indigo Ink: #312E81
-- Electric Iris: #6366F1
-- Manuscript Sage: #059669
-- Headings: Newsreader / Georgia fallback
-- Interface: Plus Jakarta Sans / system fallback
-- Mobile-first, editorial, clean, com superfícies brancas e bordas hairline.
 
-## Estado desta implementação
-Esta primeira versão transforma a referência visual em uma aplicação web funcional:
-- navegação entre Início, Meus Ebooks, Book Builder, Editor e Templates;
-- criação de capítulos;
-- edição de título, subtítulo, autor, público, tom e tema;
-- editor de manuscrito;
-- contagem de palavras;
-- autosave local via localStorage;
-- impressão/exportação pelo navegador;
-- templates iniciais.
+- Editorial e mobile-first.
+- Superfícies claras e bordas discretas.
+- Hierarquia tipográfica forte.
+- Newsreader/Georgia para títulos.
+- Plus Jakarta Sans/system para interface.
+- Indigo/iris/sage como referências cromáticas do material original.
 
-## Próximas integrações
-1. Persistência em Supabase.
-2. Autenticação.
-3. IA para outline, geração, expansão, resumo, reescrita e revisão.
-4. Importação de DOCX/PDF/TXT.
-5. Exportação real para PDF/EPUB/DOCX.
-6. Capas e metadados.
-7. Histórico/versionamento.
-8. PWA/offline.
+## Implementação atual
+
+A referência visual foi transformada em aplicação funcional com:
+
+- navegação principal;
+- biblioteca;
+- Book Builder;
+- editor rich-text;
+- IA Studio;
+- importação;
+- exportação;
+- capas e metadados;
+- autenticação/persistência;
+- PWA.
+
+Este documento descreve a origem visual; o estado funcional atual está em `docs/PROJECT-STATUS.md`.
