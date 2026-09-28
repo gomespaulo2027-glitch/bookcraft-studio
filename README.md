@@ -1,47 +1,107 @@
 # BookCraft Studio
 
-Aplicação mobile-first para criação e produção de ebooks, reconstruída a partir do desenvolvimento enviado do Google AI Studio/Stitch.
+Aplicação web **mobile-first** para criação, edição e produção de ebooks.
 
 ## Estado atual
-- Home Dashboard
-- Biblioteca de ebooks
-- Book Builder / Manuscript Canvas
-- Editor de manuscrito
-- Templates iniciais
-- Criação e edição de capítulos
-- Contagem de palavras
-- Autosave local
-- Exportação/impressão pelo navegador
-- Design system editorial baseado no material Stitch
-- IA real via Gemini: outline, geração de capítulos e edição editorial
-- IA Studio dedicado com estados de carregamento e erros
-- Configuração por variáveis de ambiente, sem chave commitada
 
-## Desenvolvimento local
+O projeto já possui:
+
+- Dashboard e biblioteca de ebooks.
+- Book Builder e criação de capítulos.
+- Editor rich-text baseado em `contentEditable`.
+- Metadados de publicação e referências.
+- Importação de TXT, DOCX e PDF.
+- Exportação para PDF, DOCX e EPUB.
+- IA Studio e ações de IA no editor.
+- Gemini integrado através da Supabase Edge Function `bookcraft-ai`.
+- Supabase Auth, Database, RLS e Storage.
+- Capas e metadados.
+- PWA com manifest, ícone e service worker.
+- CI de build com GitHub Actions.
+
+## Estrutura
+
+```
+.
+├── .github/workflows/       # CI
+├── docs/                    # documentação técnica
+├── public/                  # assets públicos e PWA
+├── src/
+│   ├── lib/                # integrações e utilitários
+│   ├── AILab.jsx
+│   ├── App.jsx
+│   ├── AuthPanel.jsx
+│   ├── ImportPanel.jsx
+│   ├── main.jsx
+│   └── styles.css
+├── .env.example
+├── index.html
+├── package.json
+└── vite.config.js
+```
+
+## Desenvolvimento
+
 ```bash
 npm install
 npm run dev
-```
-
-Build de produção:
-```bash
 npm run build
 ```
 
-## IA real — configuração
+O CI usa Node 20, `npm install` e `npm run build`.
 
-Copie `.env.example` para `.env.local` e defina `VITE_GEMINI_API_KEY`. Opcionalmente defina `VITE_GEMINI_MODEL`. Nunca coloque uma chave real no GitHub.
+## Configuração
 
-A documentação da integração está em `docs/AI-INTEGRATION.md`. Nesta fase, a chamada Gemini é feita pelo frontend para permitir validação rápida. Antes de produção, a chamada deve migrar para uma função server-side/Edge Function.
+O frontend usa:
 
-## Arquitetura de evolução
-O frontend está separado por áreas para permitir adicionar, sem reconstrução do produto:
-- Supabase Auth + Database
-- IA para outline, geração, reescrita e revisão
-- importação DOCX/PDF/TXT
-- exportação PDF/EPUB/DOCX
-- gestão de capas e metadados
-- histórico/versionamento
-- PWA/offline
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_PUBLISHABLE_KEY`
+- `VITE_GEMINI_MODEL` (opcional)
 
-A referência de design e o plano de desenvolvimento estão em `docs/STITCH-DESENVOLVIMENTO.md`.
+A chave privada **`GEMINI_API_KEY` não pertence ao frontend**. Ela deve permanecer exclusivamente no ambiente da Edge Function `bookcraft-ai`.
+
+Não criar, commitar ou pedir chaves privadas dentro deste repositório.
+
+## IA
+
+O fluxo atual é:
+
+```
+React/Vite
+   │
+   └── Supabase client
+          │
+          └── Edge Function: bookcraft-ai
+                    │
+                    └── GEMINI_API_KEY
+```
+
+O adaptador do frontend está em `src/lib/gemini.js`.
+
+Consulte `docs/AI-INTEGRATION.md` antes de alterar a integração.
+
+## Supabase
+
+A arquitetura está documentada em `docs/SUPABASE-ARCHITECTURE.md`.
+
+O frontend deve usar somente a publishable key. Service-role keys e outros segredos nunca devem ser expostos no browser.
+
+## PWA
+
+O service worker está em `public/sw.js`. A estratégia atual prioriza rede para navegação e JS/CSS, evitando que deployments novos fiquem escondidos por assets antigos.
+
+## Documentação
+
+Comece por `docs/README.md` e `docs/PROJECT-STATUS.md`.
+
+## Regras para manutenção / Lovable
+
+1. Preserve funcionalidades já implementadas.
+2. Faça alterações incrementais.
+3. Não recrie a arquitetura inteira para corrigir um único problema.
+4. Não exponha segredos.
+5. Não altere Supabase/Edge Functions sem verificar o impacto no frontend.
+6. Após alterações, execute `npm run build`.
+7. Registre cada correção importante em um commit objetivo.
+
+O objetivo é manter o repositório como a **fonte organizada do código**, enquanto problemas específicos de ambiente podem ser resolvidos no Lovable sem apagar ou substituir o trabalho existente.
